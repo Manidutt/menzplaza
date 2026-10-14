@@ -8,53 +8,132 @@ import FitFinderSection from "@/components/fit/FitFinderSection";
 
 export const revalidate = 60; // 1-minute ISR for fast response and fresh data
 
+const FALLBACK_CATEGORIES = [
+  {
+    id: "cat-1",
+    name: "Formal & Dress Trousers",
+    slug: "formal-trousers",
+    description: "Italian cut wool blends and stretch executive trousers for boardroom impact.",
+    image: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80",
+    _count: { products: 24 },
+  },
+  {
+    id: "cat-2",
+    name: "Casual Chinos",
+    slug: "chinos",
+    description: "Tailored 4-way stretch Supima cotton chinos built for effortless work-to-weekend transition.",
+    image: "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?auto=format&fit=crop&w=800&q=80",
+    _count: { products: 18 },
+  },
+  {
+    id: "cat-3",
+    name: "Denim & Jeans",
+    slug: "jeans",
+    description: "Artisanal ring-spun Japanese selvedge denim in slim-tapered and modern straight fits.",
+    image: "https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=800&q=80",
+    _count: { products: 16 },
+  },
+  {
+    id: "cat-4",
+    name: "Tactical & Cargo Pants",
+    slug: "cargos",
+    description: "Utilitarian pocket architecture in reinforced ripstop and lightweight technical canvas.",
+    image: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=800&q=80",
+    _count: { products: 12 },
+  },
+  {
+    id: "cat-5",
+    name: "Pure Linen Pants",
+    slug: "linen-pants",
+    description: "Breathable European flax trousers designed to keep you crisp through Indian summers.",
+    image: "https://images.unsplash.com/photo-1506629082955-511b1aa562c8?auto=format&fit=crop&w=800&q=80",
+    _count: { products: 10 },
+  },
+  {
+    id: "cat-6",
+    name: "Tailored Joggers",
+    slug: "joggers",
+    description: "Athletic luxury cut with tapered ankle definition and concealed zip pockets.",
+    image: "https://images.unsplash.com/photo-1552902865-b72c031ac5ea?auto=format&fit=crop&w=800&q=80",
+    _count: { products: 14 },
+  },
+  {
+    id: "cat-7",
+    name: "Gurkha & Pleated Trousers",
+    slug: "gurkha-trousers",
+    description: "High-rise vintage cummerbund waistband with dual reverse pleats and side adjusters.",
+    image: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80",
+    _count: { products: 8 },
+  },
+  {
+    id: "cat-8",
+    name: "Performance & Travel Pants",
+    slug: "performance-pants",
+    description: "Wrinkle-resistant, stain-repellent smart commuting trousers with hidden flex.",
+    image: "https://images.unsplash.com/photo-1604176354204-9268737828e4?auto=format&fit=crop&w=800&q=80",
+    _count: { products: 9 },
+  },
+];
+
 export default async function HomePage() {
-  // Fetch real data from Prisma
-  const [categories, featuredProducts, bestsellers, newArrivals, reviews] = await Promise.all([
-    prisma.category.findMany({
-      where: { isActive: true },
-      orderBy: { displayOrder: "asc" },
-      include: {
-        _count: { select: { products: true } },
-      },
-    }),
-    prisma.product.findMany({
-      where: { isActive: true, isFeatured: true },
-      take: 4,
-      include: {
-        images: { orderBy: { displayOrder: "asc" } },
-        variants: true,
-        category: { select: { name: true, slug: true } },
-      },
-    }),
-    prisma.product.findMany({
-      where: { isActive: true, isBestseller: true },
-      take: 4,
-      include: {
-        images: { orderBy: { displayOrder: "asc" } },
-        variants: true,
-        category: { select: { name: true, slug: true } },
-      },
-    }),
-    prisma.product.findMany({
-      where: { isActive: true, isNewArrival: true },
-      take: 4,
-      include: {
-        images: { orderBy: { displayOrder: "asc" } },
-        variants: true,
-        category: { select: { name: true, slug: true } },
-      },
-    }),
-    prisma.review.findMany({
-      where: { isApproved: true },
-      take: 3,
-      orderBy: { rating: "desc" },
-      include: {
-        user: { select: { name: true } },
-        product: { select: { name: true, slug: true } },
-      },
-    }),
-  ]);
+  // Safe fetch from Prisma with fallback
+  let categories: any[] = [];
+  let featuredProducts: any[] = [];
+  let bestsellers: any[] = [];
+  let newArrivals: any[] = [];
+  let reviews: any[] = [];
+
+  try {
+    [categories, featuredProducts, bestsellers, newArrivals, reviews] = await Promise.all([
+      prisma.category.findMany({
+        where: { isActive: true },
+        orderBy: { displayOrder: "asc" },
+        include: {
+          _count: { select: { products: true } },
+        },
+      }),
+      prisma.product.findMany({
+        where: { isActive: true, isFeatured: true },
+        take: 4,
+        include: {
+          images: { orderBy: { displayOrder: "asc" } },
+          variants: true,
+          category: { select: { name: true, slug: true } },
+        },
+      }),
+      prisma.product.findMany({
+        where: { isActive: true, isBestseller: true },
+        take: 4,
+        include: {
+          images: { orderBy: { displayOrder: "asc" } },
+          variants: true,
+          category: { select: { name: true, slug: true } },
+        },
+      }),
+      prisma.product.findMany({
+        where: { isActive: true, isNewArrival: true },
+        take: 4,
+        include: {
+          images: { orderBy: { displayOrder: "asc" } },
+          variants: true,
+          category: { select: { name: true, slug: true } },
+        },
+      }),
+      prisma.review.findMany({
+        where: { isApproved: true },
+        take: 3,
+        orderBy: { rating: "desc" },
+        include: {
+          user: { select: { name: true } },
+          product: { select: { name: true, slug: true } },
+        },
+      }),
+    ]);
+  } catch (error) {
+    console.warn("Database fallback in HomePage:", error);
+  }
+
+  const displayCategories = categories.length > 0 ? categories : FALLBACK_CATEGORIES;
 
   return (
     <div className="space-y-16 sm:space-y-24 pb-16">
@@ -145,7 +224,7 @@ export default async function HomePage() {
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-          {categories.map((cat) => (
+          {displayCategories.map((cat) => (
             <Link
               key={cat.id}
               href={`/products?category=${cat.slug}`}

@@ -1,5 +1,15 @@
+import path from "path";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+
+if (
+  !process.env.DATABASE_URL ||
+  process.env.DATABASE_URL.includes("dev.db") ||
+  process.env.DATABASE_URL.startsWith("file:")
+) {
+  const dbPath = path.resolve(process.cwd(), "prisma", "dev.db");
+  process.env.DATABASE_URL = `file:${dbPath}`;
+}
 
 const prisma = new PrismaClient();
 

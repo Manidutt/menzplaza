@@ -8,19 +8,23 @@ interface PageProps {
 }
 
 export async function generateMetadata({ params }: PageProps) {
-  const product = await prisma.product.findUnique({
-    where: { slug: params.slug },
-    select: { name: true, description: true },
-  });
+  try {
+    const product = await prisma.product.findUnique({
+      where: { slug: params.slug },
+      select: { name: true, description: true },
+    });
 
-  if (!product) {
-    return { title: "Product Not Found | MENZPLAZA" };
+    if (!product) {
+      return { title: "Product Not Found | MENZPLAZA" };
+    }
+
+    return {
+      title: `${product.name} | MENZPLAZA`,
+      description: product.description.substring(0, 160),
+    };
+  } catch {
+    return { title: "Men's Specialized Pants | MENZPLAZA" };
   }
-
-  return {
-    title: `${product.name} | MENZPLAZA`,
-    description: product.description.substring(0, 160),
-  };
 }
 
 export default async function ProductDetailPage({ params }: PageProps) {
